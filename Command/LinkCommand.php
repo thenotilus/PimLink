@@ -9,6 +9,7 @@
 
 namespace Notilus\PimLinkBundle\Command;
 
+use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,10 +17,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Monolog\Logger;
 
 use Notilus\PimLinkBundle\Helper\CsvHelper;
+use Notilus\PimLinkBundle\Map;
 
 class LinkCommand extends Command
 {
     private $_logger;
+    private $_csvhelper;
+
 
     private $_classmap = [
         "weka" => "WekaMap",
@@ -30,6 +34,7 @@ class LinkCommand extends Command
         parent::__construct();
 
         $this->_logger = new Logger("PIMLINK");
+        $this->_csvhelper = new CsvHelper();
     }
 
     protected function configure()
@@ -49,6 +54,9 @@ class LinkCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
+
+
         $this->_logger->info("#############");
         $this->_logger->info("### START ###");
         $this->_logger->info("#############");
@@ -59,10 +67,38 @@ class LinkCommand extends Command
         $this->_logger->info('Provided PIM file : '.$file);
         $this->_logger->info('Targeted application : '.$option);
 
-        if (!$this->callTarget($option,$file))
-            $this->_logger->info("Link process failed.");
-        else
-            $this->_logger->info("Link process is successful !");
+
+        if (!$source_data = $this->_csvhelper->getCSV($file)) {
+            $this->_logger->info("Source Class could not be instantiated.");
+        } else {
+            $source = new Map\PimMap();
+            $source->setDataSource($source_data);
+
+            $destination = null;
+            if ($dest_class_name = $this->checkTarget($option)) {
+                $name  = "Map\\".$dest_class_name;
+                $destination = new ReflectionClass('Map\\'.$name);
+                $destination->setDataSource($source_data);
+            }
+        }
+
+
+//        if (!$this->callTarget($option,$file))
+//            $this->_logger->info("Link process failed.");
+//        else
+//            $this->_logger->info("Link process is successful !");
+    }
+
+
+
+    private function checkTarget($option) {
+        $option = strtolower($option);
+
+        if (in_array($option, strtolower($this->_classmap))
+            && class_exists(ucfirst($option)."Map")) {
+            return ucfirst($option)."Map";
+        }
+        return false;
     }
 
     /**
@@ -84,11 +120,10 @@ class LinkCommand extends Command
             && class_exists(ucfirst($lowoption)."Map"))
         {
             $class = ucfirst($lowoption)."Map";
-            $this->_logger("Targeted Class : ".$class);
-        } else {
-            return false;
+            $this->_logger->info("Targeted Class : ".$class);
+            return ucfirst($lowoption)."Map";
         }
-
+        return false;
     }
 
 }
