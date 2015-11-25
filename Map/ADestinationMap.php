@@ -1,44 +1,42 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * User: seth
  * Date: 24/11/15
  * Time: 14:35
  */
-class ADestinationMap implements IMap
+
+namespace Notilus\PimLinkBundle\Map;
+use Monolog\Logger;
+
+abstract class ADestinationMap implements IMap
 {
-
     protected $data;
+    protected $products;
+    protected $logger;
+    public $name;
 
-    public function setDataSource($data)
+    function __construct($name) {
+        $this->logger = new Logger($name);
+    }
+
+    // CLASSIC IMPLEM
+    public function getDataSource()
     {
-        // TODO: Implement setDataSource() method.
+        return $this->data;
     }
 
     public function getProductBySKU($sku)
     {
-        // TODO: Implement getProductBySKU() method.
+        foreach ($this->products as $k => $product) {
+            if ($k == $sku) return $product;
+        }
+        return null;
     }
 
-    public function removeProductBySQU($sku)
-    {
-        // TODO: Implement removeProductBySQU() method.
-    }
-
-    public function addProduct($product)
+    public function addProduct($data)
     {
         // TODO: Implement addProduct() method.
-    }
-
-    public function getDataSource()
-    {
-        // TODO: Implement getDataSource() method.
-    }
-
-    public function diffDataSource($src)
-    {
-        // TODO: Implement diffDataSource() method.
     }
 
     public function removeProductBySKU($sku)
@@ -51,8 +49,7 @@ class ADestinationMap implements IMap
         // TODO: Implement setProductStatus() method.
     }
 
-    public function getField($reference_name)
-    {
-        // TODO: Implement getField() method.
-    }
+    // USELESS METHODS
+    public function diffDataSource($src){}
+
 }

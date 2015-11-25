@@ -45,14 +45,15 @@ class CsvHelper
         $yaml = new Yaml\Parser();
         $reference = $yaml->parse(file_get_contents(__DIR__.'/../reference.yml'));
         $relational = array();
+        $reference = array_keys($reference);
 
         unset($arr[0]);
         foreach ($arr as $r => $row) {
-            foreach ($row as $col) {
-                $relational[$r][$reference[$r]] = $col;
+            foreach ($row as $k => $col) {
+                $relational[$r][$reference[$k]] = $col;
             }
         }
-        print_r($relational);
+        return $relational;
     }
 
     /**

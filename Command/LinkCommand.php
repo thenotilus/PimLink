@@ -24,10 +24,8 @@ class LinkCommand extends Command
     private $_logger;
     private $_csvhelper;
 
-
     private $_classmap = [
         "weka" => "WekaMap",
-        "ti" => "TIMap",
     ];
 
     public function __construct() {
@@ -42,7 +40,7 @@ class LinkCommand extends Command
         $this
             ->setName('pimlink:execute')
             ->addArgument('file', InputArgument::REQUIRED, "PIM csv products file" )
-            ->addArgument("option", InputArgument::REQUIRED, "Targeted application ('all', 'Weka', 'TI', etc.)")
+            ->addArgument("option", InputArgument::REQUIRED, "Targeted application ('weka', 'ti', etc.)")
             ->setDescription('Creates the link between PIM and external client site web')
         ;
     }
@@ -54,9 +52,6 @@ class LinkCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
-
-
         $this->_logger->info("#############");
         $this->_logger->info("### START ###");
         $this->_logger->info("#############");
@@ -67,61 +62,41 @@ class LinkCommand extends Command
         $this->_logger->info('Provided PIM file : '.$file);
         $this->_logger->info('Targeted application : '.$option);
 
-
-        if (!$source_data = $this->_csvhelper->getCSV($file)) {
-            $this->_logger->info("Source Class could not be instantiated.");
-        } else {
-            $source = new Map\PimMap();
-            $source->setDataSource($source_data);
-
-            $destination = null;
-            if ($dest_class_name = $this->checkTarget($option)) {
-                $name  = "Map\\".$dest_class_name;
-                $destination = new ReflectionClass('Map\\'.$name);
-                $destination->setDataSource($source_data);
-            }
+        if (!array_key_exists($option, $this->_classmap)) {
+            $this->_logger->info("Unknown option : ".$option);
+            exit ;
         }
 
+        $this->_logger->info("Creating SRC data source");
+        $source = new Map\PimMap();
+        $source->setDataSource($file);
 
-//        if (!$this->callTarget($option,$file))
-//            $this->_logger->info("Link process failed.");
-//        else
-//            $this->_logger->info("Link process is successful !");
+
+        $this->_logger->info("Creating DST data source : ".$option);
+        if ($dst_class_name = $this->checkTarget($option)) {
+            $this->_logger->info("Class was found");
+            $destination = new $dst_class_name();
+            $destination->setDataSource(null);
+        } else {
+            $this->_logger->info("No class found for option  : ".$option);
+            exit ;
+        }
+
+        //Diff
+        $new_dst_data = $source->diffDataSource($destination->getDataSource());
+        $destination->updateSource($new_dst_data);
+
+        // Send modified data
+        $destination->updateSource();
     }
-
-
 
     private function checkTarget($option) {
         $option = strtolower($option);
 
-        if (in_array($option, strtolower($this->_classmap))
-            && class_exists(ucfirst($option)."Map")) {
-            return ucfirst($option)."Map";
-        }
-        return false;
-    }
-
-    /**
-     * @param $option
-     * @param $file
-     * @return bool
-     */
-    private function callTarget($option, $file) {
-        $lowoption = strtolower($option);
-        $csvhelper = new CsvHelper();
-        $v_data = $csvhelper->getCSV($file);
-
-        if (!$v_data) {
-            $this->_logger->info("Data extraction failed. Check the csv file.");
-            return false;
-        }
-
-        if (in_array(strtolower($option), $this->_classmap)
-            && class_exists(ucfirst($lowoption)."Map"))
-        {
-            $class = ucfirst($lowoption)."Map";
-            $this->_logger->info("Targeted Class : ".$class);
-            return ucfirst($lowoption)."Map";
+        $this->_logger->info("Checking if class exists");
+        if (array_key_exists($option, $this->_classmap)
+            && class_exists('Notilus\PimLinkBundle\Map\\'.$this->_classmap[$option])) {
+            return 'Notilus\PimLinkBundle\Map\\'.$this->_classmap[$option];
         }
         return false;
     }

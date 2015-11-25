@@ -12,20 +12,20 @@ namespace Notilus\PimLinkBundle\Map;
 interface IMap
 {
 
-    public function getField($reference_name);
-
     public function setDataSource($data);
 
     public function getDataSource();
 
-    public function diffDataSource($src);
+    public function diffDataSource($dst);
 
     public function getProductBySKU($sku);
 
     public function removeProductBySKU($sku);
 
-    public function addProduct($sku);
+    public function addProduct($data);
 
     public function setProductStatus($sku, $status = 0);
+
+    public function updateSource($new_data);
 
 }

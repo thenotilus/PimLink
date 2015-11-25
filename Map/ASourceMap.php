@@ -7,11 +7,10 @@
  * Time: 14:35
  */
 
-
 namespace Notilus\PimLinkBundle\Map;
 use Monolog\Logger;
 
-class ASourceMap implements IMap
+abstract class ASourceMap implements IMap
 {
 
     protected $data;
@@ -23,52 +22,31 @@ class ASourceMap implements IMap
         $this->logger = new Logger($name);
     }
 
-    public function setDataSource($data)
-    {
-        // SET ARRAY RAW DATA
-        // THEN SET ARRAY OF PRODUCT() KEYED BY SKU
-    }
-
-    public function getProductBySKU($sku)
-    {
-        // TODO: Implement getProductBySKU() method.
-    }
-
-    public function removeProductBySQU($sku)
-    {
-        // ############################
-        // NOTHING HERE AND NO OVERRIDE
-    }
-
-    public function addProduct($product)
-    {
-        // ############################
-        // NOTHING HERE AND NO OVERRIDE
-    }
-
+    // CLASSIQUE IMPLEM
     public function getDataSource()
     {
         return $this->data;
     }
 
-    public function diffDataSource($src)
+    public function getProductBySKU($sku)
     {
-        // TODO: Implement diffDataSource() method.
-    }
-
-    public function removeProductBySKU($sku)
-    {
-        // TODO: Implement removeProductBySKU() method.
-    }
-
-    public function setProductStatus($sku, $status = 0)
-    {
-        // TODO: Implement setProductStatus() method.
-    }
-
-    public function getField($reference_name)
-    {
-        // IMPLEMENT FOR EACH DESTINATION CLASS
+        foreach ($this->products as $k => $product) {
+            if ($k == $sku) return $product;
+        }
         return null;
     }
+
+
+    public function diffDataSource($dst)
+    {
+        // TODO: Implement diffDataSource() method.
+        return null;
+    }
+
+    // USELESS FUNCTION
+    public function addProduct($product) {}
+    public function removeProductBySKU($sku) {}
+    public function setProductStatus($sku, $status = 0) {}
+    public function updateSource($new_data){}
+
 }
