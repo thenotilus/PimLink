@@ -9,7 +9,7 @@
 
 namespace Notilus\PimLinkBundle\Command;
 
-use ReflectionClass;
+use Notilus\PimLinkBundle\Map\Implementations\PimMap;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Monolog\Logger;
 
 use Notilus\PimLinkBundle\Helper\CsvHelper;
+use Notilus\PimLinkBundle\Map\Implementations;
 use Notilus\PimLinkBundle\Map;
 
 class LinkCommand extends Command
@@ -68,26 +69,22 @@ class LinkCommand extends Command
         }
 
         $this->_logger->info("Creating SRC data source");
-        $source = new Map\PimMap();
-        $source->setDataSource($file);
+        $source = new PimMap();
+        $source->getProducts($file);
 
 
         $this->_logger->info("Creating DST data source : ".$option);
         if ($dst_class_name = $this->checkTarget($option)) {
             $this->_logger->info("Class was found");
             $destination = new $dst_class_name();
-            $destination->setDataSource(null);
+            $destination->getProducts(null);
         } else {
             $this->_logger->info("No class found for option  : ".$option);
             exit ;
         }
 
         //Diff
-        $new_dst_data = $source->diffDataSource($destination->getDataSource());
-        $destination->updateSource($new_dst_data);
-
-        // Send modified data
-        $destination->updateSource();
+        $source->diffProducts($destination);
     }
 
     private function checkTarget($option) {
@@ -95,8 +92,8 @@ class LinkCommand extends Command
 
         $this->_logger->info("Checking if class exists");
         if (array_key_exists($option, $this->_classmap)
-            && class_exists('Notilus\PimLinkBundle\Map\\'.$this->_classmap[$option])) {
-            return 'Notilus\PimLinkBundle\Map\\'.$this->_classmap[$option];
+            && class_exists('Notilus\PimLinkBundle\Map\Implementations\\'.$this->_classmap[$option])) {
+            return 'Notilus\PimLinkBundle\Map\Implementations\\'.$this->_classmap[$option];
         }
         return false;
     }
