@@ -1,3 +1,0 @@
-pim_link_homepage:
-    path:     /hello/{name}
-    defaults: { _controller: PimLinkBundle:Default:index }
