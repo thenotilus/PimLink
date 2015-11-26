@@ -39,3 +39,6 @@
 # Csv files
 /app/csvfiles/
 *.csv
+
+# Workspace
+/.idea/
