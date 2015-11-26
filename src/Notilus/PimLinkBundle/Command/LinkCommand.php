@@ -25,10 +25,6 @@ class LinkCommand extends Command
     private $_logger;
     private $_csvhelper;
 
-    private $_classmap = [
-        "weka" => "WekaMap",
-    ];
-
     public function __construct() {
         parent::__construct();
 
@@ -63,10 +59,6 @@ class LinkCommand extends Command
         $this->_logger->info('Provided PIM file : '.$file);
         $this->_logger->info('Targeted application : '.$option);
 
-        if (!array_key_exists($option, $this->_classmap)) {
-            $this->_logger->info("Unknown option : ".$option);
-            exit ;
-        }
 
         $this->_logger->info("Creating SRC data source");
         $source = new PimMap();
@@ -77,23 +69,24 @@ class LinkCommand extends Command
         if ($dst_class_name = $this->checkTarget($option)) {
             $this->_logger->info("Class was found");
             $destination = new $dst_class_name();
-            $destination->getProducts(null);
+            $destination->getProducts();
         } else {
             $this->_logger->info("No class found for option  : ".$option);
             exit ;
         }
 
         //Diff products
-        $source->diffProducts($destination);
+        if ($destination->checkAndCreateProductsList())
+            $source->diffProducts($destination);
     }
 
     private function checkTarget($option) {
         $option = strtolower($option);
 
         $this->_logger->info("Checking if class exists");
-        if (array_key_exists($option, $this->_classmap)
-            && class_exists('Notilus\PimLinkBundle\Map\Implementations\\'.$this->_classmap[$option])) {
-            return 'Notilus\PimLinkBundle\Map\Implementations\\'.$this->_classmap[$option];
+        $class_name = ucfirst($option)."Map";
+        if (class_exists('Notilus\PimLinkBundle\Map\Implementations\\'.$class_name)) {
+            return 'Notilus\PimLinkBundle\Map\Implementations\\'.$class_name;
         }
         return false;
     }

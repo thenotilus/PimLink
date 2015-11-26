@@ -35,8 +35,6 @@ class CsvHelper
 //            printf("%s: %d\n", $col, $n);
 //        }
 
-        $this->check_reference($arr);
-
         return $arr;
     }
 
@@ -80,33 +78,33 @@ class CsvHelper
     }
 
 
-    public function check_reference($arr) {
+    public function check_reference($array_list) {
         $logger = new Logger("CSVHELPER");
         $yaml = new Yaml\Parser();
         $reference = $yaml->parse(file_get_contents(__DIR__.'/../reference.yml'));
 
         $logger->info("Checking reference map");
-        $col = $arr[0];
-        $unknown_count = 0;
-        $range_count = 0;
+        foreach ($array_list as $sku => $arr) {
+            $col = array_keys($arr);
+            $unknown_count = 0;
 
-        foreach ($col as $n => $c) {
-            if (!array_key_exists($c, $reference)) {
-                $logger->error("Column : '".$c."' is not referenced");
-                $unknown_count++;
-            } else if ($n != $reference[$c]) {
-                $logger->error("Column : '".$c."' is at position : ".$n.". Should be at position : ".$reference[$c]);
-                $range_count++;
+
+            foreach ($reference as $name => $r) {
+                if (!array_key_exists($name, $arr)) {
+                    $logger->error("Missing reference in product : '".$name."'");
+                    $unknown_count++;
+                }
+            }
+
+            if ($unknown_count > 0) {
+                $logger->info("################################");
+                $logger->info("Bug report for product : ".$sku);
+                $logger->info("Number of non-referenced columns : ".$unknown_count);
+                $logger->info("Reference map check KO");
+                return false;
             }
         }
 
-        $logger->info("Number of non-referenced columns : ".$unknown_count);
-        $logger->info("Number of misplaced columns : ".$range_count);
-
-        if ($unknown_count + $range_count > 0) {
-            $logger->info("Reference map check KO");
-            return false;
-        }
         $logger->info("Reference map check OK");
         return true;
     }

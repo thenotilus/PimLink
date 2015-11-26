@@ -27,11 +27,13 @@ class PimMap extends ASourceMap
     }
 
 
-    public function getProducts($data)
+    public function getProducts($file)
     {
-        $source_data = $this->_csvhelper->getCSV($data);
+        $this->reference = $file;
+        $source_data = $this->_csvhelper->getCSV($file);
         $source_data = $this->_csvhelper->relationalArray($source_data);
-        if (!$source_data) {
+
+        if ($this->_csvhelper->check_reference($source_data) && !$source_data) {
             $this->_logger->info("Data source extraction failed.");
         } else {
             $this->_logger->info("Creating products list");
@@ -44,8 +46,11 @@ class PimMap extends ASourceMap
     }
 
 
+    /**
+     * @param ADestinationMap $destination
+     */
     public function diffProducts(ADestinationMap $destination)
     {
-        // TODO: Implement diffProducts() method.
+
     }
 }

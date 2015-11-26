@@ -7,7 +7,9 @@
  */
 
 namespace Notilus\PimLinkBundle\Map;
-use Monolog\Logger;
+use Notilus\PimLinkBundle\Entity\Product;
+use Notilus\PimLinkBundle\Helper\CsvHelper;
+use Symfony\Bridge\Monolog\Logger;
 
 abstract class ADestinationMap
 {
@@ -15,12 +17,25 @@ abstract class ADestinationMap
     protected $products;
     protected $logger;
 
+    public abstract function getProducts();
+    public abstract function updateProduct($sku, $data);
+    public abstract function deleteProduct($sku);
+    public abstract function addProduct($data = array());
 
-    public abstract function getProducts($data);
-    public abstract function mapFields($data);
-    public abstract function updateProduct($data);
-    public abstract function deleteProduct($data);
-    public abstract function addProduct($data);
-    public abstract function addProducts($data);
+    public function addProducts($data = array()) {
+        $products[$data['sku']] = new Product($data);
+    }
 
+    public function checkAndCreateProductsList() {
+        $logger = new Logger("ADST");
+        $csvhelper = new CsvHelper();
+
+        $source_data = $csvhelper->check_reference($this->data);
+        $logger->info("Checking data");
+        if (is_array($this->data) && count($this->data)) {
+
+        } else {
+            return false;
+        }
+    }
 }

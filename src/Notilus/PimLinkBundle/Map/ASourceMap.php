@@ -17,7 +17,7 @@ abstract class ASourceMap
     protected $products;
     protected $logger;
 
-    public abstract function getProducts($data);
+    public abstract function getProducts($file);
     public abstract function diffProducts(ADestinationMap $destination);
 
 }
