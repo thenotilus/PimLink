@@ -3,44 +3,23 @@
  * Created by PhpStorm.
  * User: seth
  * Date: 26/11/15
- * Time: 11:08
+ * Time: 16:49
  */
 
 namespace Notilus\PimLinkBundle\Map\Implementations;
 
-use Mage;
+
 use Notilus\PimLinkBundle\Map\ADestinationMap;
-use Notilus\PimLinkBundle\Entity\Product;
 
-use Weka_Core_Helper_Data;
-//Require_once '../app/Mage.php';
-Require_once '/home/seth/Work/magento_catalogue/app/Mage.php';
-
-
-class TiMap extends ADestinationMap
+class ComundiMap extends ADestinationMap
 {
-
-    public function initConnection()
-    {
-        $this->logger->info("Connecting to model");
-
-        Mage::app();
-        $store = Mage::app()->getStore(Weka_Core_Helper_Data::TI_STORE_CODE);
-        Mage::app()->setCurrentStore($store->getId());
-
-        $this->database = Mage::getModel("ti_catalog/product");
-    }
 
     public function extractProducts()
     {
-        $this->logger->info("Retreiving products");
-        $products = $this->database->getCollection()->addAttributeToSelect('*');
-        foreach ($products as $p) {
-            $this->addProduct($p->getData(), $p->getSku());
-        }
+        // TODO: Implement getProducts() method.
     }
 
-    public function updateProduct($new_product, $sku)
+    public function updateProduct($sku, $data)
     {
         // TODO: Implement updateProduct() method.
     }
@@ -48,6 +27,16 @@ class TiMap extends ADestinationMap
     public function deleteProduct($sku)
     {
         // TODO: Implement deleteProduct() method.
+    }
+
+    public function addProduct($data = array())
+    {
+        // TODO: Implement addProduct() method.
+    }
+
+    public function initConnection()
+    {
+        // TODO: Implement initConnection() method.
     }
 
     public function createProduct($product, $sku)

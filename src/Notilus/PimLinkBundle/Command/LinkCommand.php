@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Monolog\Logger;
 
-use Notilus\PimLinkBundle\Helper\CsvHelper;
+use Notilus\PimLinkBundle\Helper\PimFileHelper;
 use Notilus\PimLinkBundle\Map\Implementations;
 use Notilus\PimLinkBundle\Map;
 
@@ -29,7 +29,7 @@ class LinkCommand extends Command
         parent::__construct();
 
         $this->_logger = new Logger("PIMLINK");
-        $this->_csvhelper = new CsvHelper();
+        $this->_csvhelper = new PimFileHelper();
     }
 
     protected function configure()
@@ -62,21 +62,21 @@ class LinkCommand extends Command
 
         $this->_logger->info("Creating SRC data source");
         $source = new PimMap();
-        $source->getProducts($file);
+        $source->extractProducts($file);
 
 
         $this->_logger->info("Creating DST data source : ".$option);
         if ($dst_class_name = $this->checkTarget($option)) {
             $this->_logger->info("Class was found");
             $destination = new $dst_class_name();
-            $destination->getProducts();
+            $destination->extractProducts();
         } else {
             $this->_logger->info("No class found for option  : ".$option);
             exit ;
         }
 
         //Diff products
-        if ($destination->checkAndCreateProductsList())
+        if ($destination->checkProductsList())
             $source->diffProducts($destination);
     }
 
