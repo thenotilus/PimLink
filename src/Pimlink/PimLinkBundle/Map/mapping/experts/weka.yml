@@ -1,0 +1,14 @@
+#PimFields: WekaFields
+#Leave NA or numeric if not referenced
+id: NA
+activite: description
+biographie: short_description
+email: NA
+lien_interview: NA
+metier: poste
+nom: last_name
+photo: picture
+prenom: first_name
+siteWeb: website
+societe: entreprise
+telephone: NA
